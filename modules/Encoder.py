@@ -26,22 +26,19 @@ class Convolution_Block(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_dim, hidden_dim, n_layers=1,dropout=0.1,rnn_celltype='gru'):
+    def __init__(self, input_dim, hidden_dim, n_layers=1,dropout=0.1,cnn_out_channels=64,rnn_celltype='gru'):
         super(Encoder, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
         self.dropout_p = dropout
-
-        if rnn_celltype == 'lstm':
-            self.rnn_cell = nn.LSTM
-        else:
-            self.rnn_cell = nn.GRU
-        
-        cnn_out_channels=64
+      
         self.conv = Convolution_Block(self.input_dim,cnn_out_channels=cnn_out_channels)
-        self.rnn =  self.rnn_cell(cnn_out_channels, self.hidden_dim, self.n_layers, dropout=self.dropout_p, bidirectional=False,batch_first=True)
         
+        if rnn_celltype == 'lstm':
+            self.rnn =  nn.LSTM(cnn_out_channels, self.hidden_dim, self.n_layers, dropout=self.dropout_p, bidirectional=False,batch_first=True)
+        else:
+            self.rnn =  nn.GRU(cnn_out_channels, self.hidden_dim, self.n_layers, dropout=self.dropout_p, bidirectional=False,batch_first=True)
 
     def forward(self, inputs, input_lengths):
         
