@@ -16,7 +16,7 @@ else:
 class Decoder(nn.Module):
     def __init__(self, vocab_size, max_len, dec_hidden_size, encoder_hidden_size,
                  sos_id, eos_id,n_layers=1, rnn_celltye='gru',):
-        super(DecoderRNN, self).__init__()
+        super(Decoder, self).__init__()
         self.output_size = vocab_size
         self.vocab_size = vocab_size
         self.dec_hidden_size = dec_hidden_size
