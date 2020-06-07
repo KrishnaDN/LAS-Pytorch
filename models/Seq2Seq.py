@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 
 class Seq2seq(nn.Module):
 
@@ -15,10 +16,32 @@ class Seq2seq(nn.Module):
 
     def forward(self, input_variable, input_lengths=None, target_variable=None,
                 teacher_forcing_ratio=0):
+        '''
+        input_variable -->[B,Feat_Dim, Feats_Len]
+        input_lengths --->[B,Feats_Len]
+        target_variable ---> [B, Dec_T)]
+        
+        '''
         encoder_outputs, encoder_hidden = self.encoder(input_variable, input_lengths)
-        decoder_ouputs,seq_symbols = self.decoder(inputs=target_variable,
+        decoder_outputs,sequence_symbols = self.decoder(inputs=target_variable,
                               encoder_hidden=encoder_hidden,
                               encoder_outputs=encoder_outputs,
                               function=self.decode_function,
                               teacher_forcing_ratio=teacher_forcing_ratio)
-        return decoder_ouputs,seq_symbols
+        
+        
+        final_dec_outputs = torch.stack(decoder_outputs,dim=2)
+        final_sequence_symbols = torch.stack(sequence_symbols,dim=1).squeeze()
+        return final_dec_outputs,final_sequence_symbols
+
+
+
+
+
+
+
+
+
+
+
+

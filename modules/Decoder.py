@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-from attention import Attention
+from modules.attention import Attention
 
 if torch.cuda.is_available():
     import torch.cuda as device
@@ -43,8 +43,10 @@ class Decoder(nn.Module):
     def forward_step(self, input_var, hidden, encoder_outputs, context, attn_w, function):
         if self.training:
             self.rnn.flatten_parameters()
-            
-        embedded = self.embedding(input_var) 
+        
+        if torch.cuda.is_available():
+            input_var = input_var.cuda()
+        embedded = self.embedding(input_var)
     
         y_all = []
         attn_w_all = []

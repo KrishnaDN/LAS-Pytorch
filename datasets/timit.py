@@ -84,12 +84,13 @@ class TIMIT(object):
             char_mapped.append(vocab_dict['_'])
             chars_list.append('_')
         char_mapped.append(vocab_dict['</s>'])
-        chars_list.append('<\s>')
+        chars_list.append('</s>')
         return char_mapped,chars_list
     
     
             
     def process_data_train(self):
+        
         vocab_dict = self.create_vocab_dict()
         self.train_dir = os.path.join(self.timit_root,'TRAIN')
         train_subfolders = sorted(glob.glob(self.train_dir+'/*/'))
@@ -148,6 +149,7 @@ if __name__ == '__main__':
     
     config = parser.parse_args()
     timit = TIMIT(config)
+    timit.create_vocab()
     timit.process_data_train()
     timit.process_data_test()
     
