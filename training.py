@@ -64,12 +64,12 @@ def train(model,dataloader_train,epoch,optimizer,device,criterion,char_dict,LOG_
         
         
         total_loss.append(loss.item())
-        if i_batch%100==0:
-            avg_cer = calc_cer(sequence_symbols,targets,char_dict,print_item=True)
-            print('Training Loss {} after {} iteration'.format(np.mean(np.asarray(total_loss)),i_batch))
-            print('Training CER {} after {} iteration'.format(avg_cer,i_batch))
-            
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)    
+    
+    avg_cer = calc_cer(sequence_symbols,targets,char_dict,print_item=True)
+    print('Training Loss {} after {} epochs'.format(np.mean(np.asarray(total_loss)),epoch))
+    #print('Training CER {} after {} epochs'.format(avg_cer,epoch))
+    
+      
     logging.info(' total training loss %d after %d epochs', np.mean(np.asarray(total_loss)),epoch)
     
     
@@ -96,9 +96,9 @@ def evaluation(model,dataloader_test,epoch,criterion,device, char_dict,LOG_FILEN
             if i_batch%10==0:
                 avg_cer = calc_cer(sequence_symbols,targets,char_dict,print_item=True)
                 print('Evaluation Loss {} after {} iteration'.format(np.mean(np.asarray(total_loss)),i_batch))
-                print('Evaluation CER {} after {} iteration'.format(avg_cer,i_batch))
+                #print('Evaluation CER {} after {} iteration'.format(avg_cer,i_batch))
             
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)    
+    
     logging.info(' total testing loss %d after %d epochs', np.mean(np.asarray(total_loss)),epoch)
     
 
@@ -122,7 +122,8 @@ def main(config):
     dataloader_test = DataLoader(dataset_test, batch_size=config['batch_size'] ,shuffle=True,collate_fn=speech_collate) 
     
     LOG_FILENAME='log.txt'        
-    logging.info('Training Started...')    
+    logging.info('Training Started...')
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
     if not os.path.exists(args.save_modelpath):
         os.makedirs(args.save_modelpath)
         

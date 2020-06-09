@@ -5,7 +5,7 @@ Created on Fri Jun  5 01:04:17 2020
 
 @author: krishna
 """
-
+import torch
 import torch.nn as nn
 
 class Convolution_Block(nn.Module):
@@ -25,8 +25,55 @@ class Convolution_Block(nn.Module):
         return out
 
 
+class DropSubsampler(nn.Module):
+    """Subsample by droping input frames."""
+
+    def __init__(self, factor):
+        super(DropSubsampler, self).__init__()
+
+        self.factor = factor
+
+    def forward(self, xs, xlens):
+        if self.factor == 1:
+            return xs, xlens
+
+        xs = xs[:, ::self.factor, :]
+
+        xlens = [max(1, (i + self.factor - 1) // self.factor) for i in xlens]
+        xlens = torch.IntTensor(xlens)
+        return xs, xlens
+
+
+class ConcatSubsampler(nn.Module):
+    """Subsample by concatenating successive input frames."""
+
+    def __init__(self, factor, n_units):
+        super(ConcatSubsampler, self).__init__()
+
+        self.factor = factor
+        if factor > 1:
+            self.proj = nn.Linear(n_units * factor, n_units)
+
+    def forward(self, xs, xlens):
+        if self.factor == 1:
+            return xs, xlens
+
+        xs = xs.transpose(1, 0).contiguous()
+        xs = [torch.cat([xs[t - r:t - r + 1] for r in range(self.factor - 1, -1, -1)], dim=-1)
+              for t in range(xs.size(0)) if (t + 1) % self.factor == 0]
+        xs = torch.cat(xs, dim=0).transpose(1, 0)
+        # NOTE: Exclude the last frames if the length is not divisible
+
+        xs = torch.relu(self.proj(xs))
+        xlens //= self.factor
+        return xs, xlens
+
+
+
+
+
 class Encoder(nn.Module):
-    def __init__(self, input_dim, hidden_dim, n_layers=1,dropout=0.1,cnn_out_channels=64,rnn_celltype='gru'):
+    def __init__(self, input_dim, hidden_dim, n_layers=1,dropout=0.3,cnn_out_channels=64,rnn_celltype='gru'):
         super(Encoder, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
