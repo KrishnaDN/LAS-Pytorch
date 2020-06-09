@@ -52,11 +52,10 @@ def train(model,dataloader_train,epoch,optimizer,device,criterion,char_dict,LOG_
         input_features = input_features.to(device)
         input_lengths = input_lengths.to(device)
         targets = targets.to(device)
-        
-        decoder_outputs,sequence_symbols = model(input_features,input_lengths,targets)
-        
+     
         input_features.requires_grad = True
         optimizer.zero_grad()
+        decoder_outputs,sequence_symbols = model(input_features,input_lengths,targets)
         loss = criterion(decoder_outputs,targets)
         loss.backward()
         optimizer.step()
